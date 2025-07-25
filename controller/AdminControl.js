@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const Blog = require('../models/Blog');
-const Category = require('../models/Category');
+const User = require('../model/User');
+const Blog = require('../model/Blog');
+const Category = require('../model/Category');
 
 // Get admin dashboard statistics
 const getDashboard = async (req, res) => {

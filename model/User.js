@@ -1,11 +1,11 @@
+const mongoose = require('mongoose');
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     unique: true,
     trim: true,
-    minlength: 3,
-    maxlength: 30
   },
   email: {
     type: String,
@@ -68,4 +68,4 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ email: 1, username: 1 });
 userSchema.index({ isActive: 1 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('users', userSchema);

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const Blog = require('../models/Blog');
+const User = require('../model/User.js');
+const Blog = require('../model/Blog');
 
 // Register new user
 const register = async (req, res) => {
@@ -68,10 +68,10 @@ const register = async (req, res) => {
 // Login user
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     
     // Validation
-    if (!email || !password) {
+    if (!username || !password) {
       return res.status(400).json({
         success: false,
         message: 'Email and password are required'
@@ -79,7 +79,10 @@ const login = async (req, res) => {
     }
     
     // Find user
-    const user = await User.findOne({ email, isActive: true });
+    const user = await User.findOne({
+      $or: [{ email: username }, { username }],
+      isActive: true,
+    });
     
     if (!user) {
       return res.status(401).json({

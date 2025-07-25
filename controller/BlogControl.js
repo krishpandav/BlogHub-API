@@ -1,6 +1,6 @@
-const Blog = require('../models/Blog');
-const User = require('../models/User');
-const Category = require('../models/Category');
+const Blog = require('../model/Blog');
+const User = require('../model/User');
+const Category = require('../model/Category');
 
 // Create new blog
 const createBlog = async (req, res) => {

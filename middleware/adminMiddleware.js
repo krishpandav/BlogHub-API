@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../model/User');
 
 const adminMiddleware = (req, res, next) => {
   try {
