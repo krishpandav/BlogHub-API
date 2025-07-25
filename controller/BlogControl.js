@@ -6,7 +6,7 @@ const Category = require('../model/Category');
 const createBlog = async (req, res) => {
   try {
     const { title, content, summary, category, tags, featuredImage } = req.body;
-    
+
     // Validation
     if (!title || !content || !summary || !category) {
       return res.status(400).json({
@@ -14,7 +14,7 @@ const createBlog = async (req, res) => {
         message: 'Title, content, summary and category are required'
       });
     }
-    
+
     // Check if category exists
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
@@ -23,7 +23,7 @@ const createBlog = async (req, res) => {
         message: 'Invalid category'
       });
     }
-    
+
     const newBlog = new Blog({
       title,
       content,
@@ -34,25 +34,15 @@ const createBlog = async (req, res) => {
       author: req.user.userId,
       status: 'published'
     });
-    
-    const savedBlog = await newBlog.save();
-    
-    // Add blog to user's blogs array
-    await User.findByIdAndUpdate(req.user.userId, {
-      $push: { blogs: savedBlog._id }
-    });
-    
-    // Populate blog data
-    const populatedBlog = await Blog.findById(savedBlog._id)
-      .populate('author', 'username fullName profilePicture')
-      .populate('category', 'name slug');
-    
+
+    await newBlog.save();
+
     res.status(201).json({
       success: true,
       message: 'Blog created successfully',
       data: populatedBlog
     });
-    
+
   } catch (error) {
     console.error('Create blog error:', error);
     res.status(500).json({
@@ -66,26 +56,40 @@ const createBlog = async (req, res) => {
 // Get all blogs with pagination and filtering
 const getAllBlogs = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
+    const {
+      page = 1,
+      limit = 10,
       sortBy = 'createdAt',
-      sortOrder = 'desc' 
+      sortOrder = 'desc',
+      searchtext,
     } = req.query;
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
-    
-    const blogs = await Blog.find({ status: 'published' })
+
+    // Base query
+    const query = { status: 'published' };
+
+    // If searchtext is provided, add search conditions
+    if (searchtext) {
+      query.$or = [
+        { title: { $regex: searchtext, $options: 'i' } },
+        { summary: { $regex: searchtext, $options: 'i' } },
+        { content: { $regex: searchtext, $options: 'i' } },
+        { tags: { $in: [new RegExp(searchtext, 'i')] } }
+      ];
+    }
+
+    const blogs = await Blog.find(query)
       .populate('author', 'username fullName profilePicture')
       .populate('category', 'name slug')
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit));
-    
-    const totalBlogs = await Blog.countDocuments({ status: 'published' });
+
+    const totalBlogs = await Blog.countDocuments(query);
     const totalPages = Math.ceil(totalBlogs / parseInt(limit));
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -99,7 +103,7 @@ const getAllBlogs = async (req, res) => {
         }
       }
     });
-    
+
   } catch (error) {
     console.error('Get all blogs error:', error);
     res.status(500).json({
@@ -109,6 +113,7 @@ const getAllBlogs = async (req, res) => {
     });
   }
 };
+
 
 // Search blogs
 const searchBlogs = async (req, res) => {
@@ -171,7 +176,7 @@ const getBlogsByCategory = async (req, res) => {
   try {
     const { categorySlug } = req.params;
     const { page = 1, limit = 10 } = req.query;
-    
+
     // Find category
     const category = await Category.findOne({ slug: categorySlug });
     if (!category) {
@@ -180,24 +185,24 @@ const getBlogsByCategory = async (req, res) => {
         message: 'Category not found'
       });
     }
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
-    const blogs = await Blog.find({ 
-      category: category._id, 
-      status: 'published' 
+
+    const blogs = await Blog.find({
+      category: category._id,
+      status: 'published'
     })
       .populate('author', 'username fullName profilePicture')
       .populate('category', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
-    
-    const totalBlogs = await Blog.countDocuments({ 
-      category: category._id, 
-      status: 'published' 
+
+    const totalBlogs = await Blog.countDocuments({
+      category: category._id,
+      status: 'published'
     });
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -210,7 +215,7 @@ const getBlogsByCategory = async (req, res) => {
         }
       }
     });
-    
+
   } catch (error) {
     console.error('Get blogs by category error:', error);
     res.status(500).json({
@@ -225,18 +230,18 @@ const getBlogsByCategory = async (req, res) => {
 const getPopularBlogs = async (req, res) => {
   try {
     const { limit = 10 } = req.query;
-    
+
     const blogs = await Blog.find({ status: 'published' })
       .populate('author', 'username fullName profilePicture')
       .populate('category', 'name slug')
       .sort({ likes: -1, views: -1 })
       .limit(parseInt(limit));
-    
+
     res.status(200).json({
       success: true,
       data: blogs
     });
-    
+
   } catch (error) {
     console.error('Get popular blogs error:', error);
     res.status(500).json({
@@ -251,27 +256,27 @@ const getPopularBlogs = async (req, res) => {
 const getBlogById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const blog = await Blog.findById(id)
       .populate('author', 'username fullName profilePicture bio')
       .populate('category', 'name slug');
-    
+
     if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog not found'
       });
     }
-    
+
     // Increment view count
     await Blog.findByIdAndUpdate(id, { $inc: { views: 1 } });
     blog.views += 1;
-    
+
     res.status(200).json({
       success: true,
       data: blog
     });
-    
+
   } catch (error) {
     console.error('Get blog by ID error:', error);
     res.status(500).json({
@@ -287,16 +292,16 @@ const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, summary, category, tags, featuredImage } = req.body;
-    
+
     const blog = await Blog.findById(id);
-    
+
     if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog not found'
       });
     }
-    
+
     // Check if user is the author
     if (blog.author.toString() !== req.user.userId) {
       return res.status(403).json({
@@ -304,7 +309,7 @@ const updateBlog = async (req, res) => {
         message: 'Unauthorized to update this blog'
       });
     }
-    
+
     const updatedBlog = await Blog.findByIdAndUpdate(
       id,
       {
@@ -320,13 +325,13 @@ const updateBlog = async (req, res) => {
     )
       .populate('author', 'username fullName profilePicture')
       .populate('category', 'name slug');
-    
+
     res.status(200).json({
       success: true,
       message: 'Blog updated successfully',
       data: updatedBlog
     });
-    
+
   } catch (error) {
     console.error('Update blog error:', error);
     res.status(500).json({
@@ -341,16 +346,16 @@ const updateBlog = async (req, res) => {
 const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const blog = await Blog.findById(id);
-    
+
     if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog not found'
       });
     }
-    
+
     // Check if user is the author or admin
     if (blog.author.toString() !== req.user.userId && req.user.role !== 'admin') {
       return res.status(403).json({
@@ -358,19 +363,19 @@ const deleteBlog = async (req, res) => {
         message: 'Unauthorized to delete this blog'
       });
     }
-    
+
     await Blog.findByIdAndDelete(id);
-    
+
     // Remove from user's blogs array
     await User.findByIdAndUpdate(blog.author, {
       $pull: { blogs: id }
     });
-    
+
     res.status(200).json({
       success: true,
       message: 'Blog deleted successfully'
     });
-    
+
   } catch (error) {
     console.error('Delete blog error:', error);
     res.status(500).json({
@@ -386,7 +391,7 @@ const likeBlog = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.userId;
-    
+
     const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({
@@ -394,9 +399,9 @@ const likeBlog = async (req, res) => {
         message: 'Blog not found'
       });
     }
-    
+
     const user = await User.findById(userId);
-    
+
     // Check if already liked
     if (user.likedBlogs.includes(id)) {
       return res.status(400).json({
@@ -404,17 +409,17 @@ const likeBlog = async (req, res) => {
         message: 'Blog already liked'
       });
     }
-    
+
     // Add like
     await Blog.findByIdAndUpdate(id, { $inc: { likes: 1 } });
     await User.findByIdAndUpdate(userId, { $push: { likedBlogs: id } });
-    
+
     res.status(200).json({
       success: true,
       message: 'Blog liked successfully',
       data: { likes: blog.likes + 1 }
     });
-    
+
   } catch (error) {
     console.error('Like blog error:', error);
     res.status(500).json({
@@ -430,7 +435,7 @@ const unlikeBlog = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.userId;
-    
+
     const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({
@@ -438,9 +443,9 @@ const unlikeBlog = async (req, res) => {
         message: 'Blog not found'
       });
     }
-    
+
     const user = await User.findById(userId);
-    
+
     // Check if not liked
     if (!user.likedBlogs.includes(id)) {
       return res.status(400).json({
@@ -448,17 +453,17 @@ const unlikeBlog = async (req, res) => {
         message: 'Blog not liked yet'
       });
     }
-    
+
     // Remove like
     await Blog.findByIdAndUpdate(id, { $inc: { likes: -1 } });
     await User.findByIdAndUpdate(userId, { $pull: { likedBlogs: id } });
-    
+
     res.status(200).json({
       success: true,
       message: 'Blog unliked successfully',
       data: { likes: blog.likes - 1 }
     });
-    
+
   } catch (error) {
     console.error('Unlike blog error:', error);
     res.status(500).json({
@@ -474,12 +479,12 @@ const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find({ isActive: true })
       .sort({ name: 1 });
-    
+
     res.status(200).json({
       success: true,
       data: categories
     });
-    
+
   } catch (error) {
     console.error('Get categories error:', error);
     res.status(500).json({
@@ -493,7 +498,6 @@ const getAllCategories = async (req, res) => {
 module.exports = {
   createBlog,
   getAllBlogs,
-  searchBlogs,
   getBlogsByCategory,
   getPopularBlogs,
   getBlogById,
