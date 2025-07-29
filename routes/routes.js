@@ -1,21 +1,24 @@
 const express = require('express');
 const routes = express.Router();
-const { adminMiddleware, authMiddleware } = require('../middleware/adminMiddleware');
+const { adminAuth, auth } = require('../auth/auth.js');
 
 /* -------------------- Blog routes  --------------------*/
-const blogController = require('../controller/BlogControl.js');
+const {
+    getAllBlogs, getBlogsByCategory, getPopularBlogs,
+    getBlogById, getAllCategories, createBlog,
+    updateBlog, deleteBlog, likeBlog, unlikeBlog } = require('../controller/BlogControl.js');
 
-routes.get('/blogs', blogController.getAllBlogs);
-routes.get('/blogs/category/:categorySlug', blogController.getBlogsByCategory);
-routes.get('/blogs/popular', blogController.getPopularBlogs);
-routes.get('/blogs/:id', blogController.getBlogById);
-routes.get('/category', blogController.getAllCategories);
+routes.get('/blogs', getAllBlogs);
+routes.get('/blogs/category/:categorySlug', getBlogsByCategory);
+routes.get('/blogs/popular', getPopularBlogs);
+routes.get('/blogs/:id', getBlogById);
+routes.get('/category', getAllCategories);
 
-routes.post('/blog', authMiddleware, blogController.createBlog);
-routes.put('/blogs/:id', authMiddleware, blogController.updateBlog);
-routes.delete('/blogs/:id', authMiddleware, blogController.deleteBlog);
-routes.post('/blogs/:id/like', authMiddleware, blogController.likeBlog);
-routes.post('/blogs/:id/unlike', authMiddleware, blogController.unlikeBlog);
+routes.post('/blog', auth, createBlog);
+routes.put('/blog', auth, updateBlog);
+routes.delete('/blog/:id', auth, deleteBlog);
+routes.post('/blog/:id/like', auth, likeBlog);
+routes.post('/blog/:id/unlike', auth, unlikeBlog);
 
 /* -------------------- Users routes  --------------------*/
 const { register, login, getPublicProfile, getProfile, updateProfile, getMyBlogs, getLikedBlogs } = require('../controller/UserControl');
@@ -23,29 +26,36 @@ const { register, login, getPublicProfile, getProfile, updateProfile, getMyBlogs
 routes.post('/user/register', register);
 routes.post('/user/login', login);
 routes.get('/user/profile/:id', getPublicProfile);
+routes.get('/user/profile', auth, getProfile);
+routes.put('/user/profile', auth, updateProfile);
+routes.get('/user/my-blogs', auth, getMyBlogs);
+routes.get('/user/liked-blogs', auth, getLikedBlogs);
 
-// Protected routes (require authentication)
-routes.get('/user/profile', authMiddleware, getProfile);
-routes.put('/user/profile', authMiddleware, updateProfile);
-routes.get('/user/my-blogs', authMiddleware, getMyBlogs);
-routes.get('/user/liked-blogs', authMiddleware, getLikedBlogs);
+/* -------------------- Admin routes  --------------------*/
+const {
+    getDashboard,
+    getAllUsers,
+    updateUserStatus,
+    deleteUser,
+    getAllBlogsAdmin,
+    updateBlogStatus,
+    deleteBlogAdmin,
+    createCategory,
+    updateCategory,
+    deleteCategory } = require('../controller/AdminControl');
 
-
-const adminController = require('../controller/AdminControl');
-
-// ===== ADMIN ROUTES =====
 // All admin routes require authentication and admin role
-routes.get('/admin/dashboard', authMiddleware, adminMiddleware, adminController.getDashboard);
-routes.get('/admin/users', authMiddleware, adminMiddleware, adminController.getAllUsers);
-routes.put('/admin/users/:id/status', authMiddleware, adminMiddleware, adminController.updateUserStatus);
-routes.delete('/admin/users/:id', authMiddleware, adminMiddleware, adminController.deleteUser);
+routes.get('/admin/dashboard', auth, adminAuth, getDashboard);
+routes.get('/admin/users', auth, adminAuth, getAllUsers);
+routes.put('/admin/user/status', auth, adminAuth, updateUserStatus);
+routes.delete('/admin/user/:id', auth, adminAuth, deleteUser);
 
-routes.get('/admin/blogs', authMiddleware, adminMiddleware, adminController.getAllBlogsAdmin);
-routes.put('/admin/blogs/:id/status', authMiddleware, adminMiddleware, adminController.updateBlogStatus);
-routes.delete('/admin/blogs/:id', authMiddleware, adminMiddleware, adminController.deleteBlogAdmin);
+routes.get('/admin/blogs', auth, adminAuth, getAllBlogsAdmin);
+routes.put('/admin/blog/status', auth, adminAuth, updateBlogStatus);
+routes.delete('/admin/blog/:id', auth, adminAuth, deleteBlogAdmin);
 
-routes.post('/admin/category', authMiddleware, adminMiddleware, adminController.createCategory);
-routes.put('/admin/category/:id', authMiddleware, adminMiddleware, adminController.updateCategory);
-routes.delete('/admin/category/:id', authMiddleware, adminMiddleware, adminController.deleteCategory);
+routes.post('/admin/category', auth, adminAuth, createCategory);
+routes.put('/admin/category', auth, adminAuth, updateCategory);
+routes.delete('/admin/category/:id', auth, adminAuth, deleteCategory);
 
 module.exports = routes;

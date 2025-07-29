@@ -16,5 +16,5 @@ app.use(bodyParser.json());
 app.use('/api', routes);
 
 app.listen(process.env.PORT || 5051, () => {
-    console.log(`Server running on http://localhost:${process.env.PORT || 7080}`);
+    console.log(`Server running on http://localhost:${process.env.PORT || 5051}`);
 });

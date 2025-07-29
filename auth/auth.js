@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../model/User');
 
-const adminMiddleware = (req, res, next) => {
+const adminAuth = (req, res, next) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({
@@ -10,7 +10,6 @@ const adminMiddleware = (req, res, next) => {
         message: 'Access denied. Admin privileges required'
       });
     }
-
     next();
 
   } catch (error) {
@@ -22,7 +21,7 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-const authMiddleware = async (req, res, next) => {
+const auth = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -57,4 +56,4 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, adminMiddleware };
+module.exports = { auth, adminAuth };

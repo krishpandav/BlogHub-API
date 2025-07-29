@@ -37,6 +37,10 @@ const createBlog = async (req, res) => {
 
     await newBlog.save();
 
+    const populatedBlog = await Blog.findById(newBlog._id)
+      .populate('category')
+      .populate('author', 'username email');
+
     res.status(201).json({
       success: true,
       message: 'Blog created successfully',
@@ -81,7 +85,7 @@ const getAllBlogs = async (req, res) => {
     }
 
     const blogs = await Blog.find(query)
-      .populate('author', 'username fullName profilePicture')
+      .populate('author', 'username fullName image')
       .populate('category', 'name slug')
       .sort(sort)
       .skip(skip)
@@ -119,16 +123,16 @@ const getAllBlogs = async (req, res) => {
 const searchBlogs = async (req, res) => {
   try {
     const { q, page = 1, limit = 10 } = req.query;
-    
+
     if (!q) {
       return res.status(400).json({
         success: false,
         message: 'Search query is required'
       });
     }
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const searchFilter = {
       status: 'published',
       $or: [
@@ -138,16 +142,16 @@ const searchBlogs = async (req, res) => {
         { tags: { $in: [new RegExp(q, 'i')] } }
       ]
     };
-    
+
     const blogs = await Blog.find(searchFilter)
-      .populate('author', 'username fullName profilePicture')
+      .populate('author', 'username fullName image')
       .populate('category', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
-    
+
     const totalBlogs = await Blog.countDocuments(searchFilter);
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -160,7 +164,7 @@ const searchBlogs = async (req, res) => {
         }
       }
     });
-    
+
   } catch (error) {
     console.error('Search blogs error:', error);
     res.status(500).json({
@@ -192,7 +196,7 @@ const getBlogsByCategory = async (req, res) => {
       category: category._id,
       status: 'published'
     })
-      .populate('author', 'username fullName profilePicture')
+      .populate('author', 'username fullName image')
       .populate('category', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -232,7 +236,7 @@ const getPopularBlogs = async (req, res) => {
     const { limit = 10 } = req.query;
 
     const blogs = await Blog.find({ status: 'published' })
-      .populate('author', 'username fullName profilePicture')
+      .populate('author', 'username fullName image')
       .populate('category', 'name slug')
       .sort({ likes: -1, views: -1 })
       .limit(parseInt(limit));
@@ -258,7 +262,7 @@ const getBlogById = async (req, res) => {
     const { id } = req.params;
 
     const blog = await Blog.findById(id)
-      .populate('author', 'username fullName profilePicture bio')
+      .populate('author', 'username fullName image bio')
       .populate('category', 'name slug');
 
     if (!blog) {
@@ -290,8 +294,7 @@ const getBlogById = async (req, res) => {
 // Update blog
 const updateBlog = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { title, content, summary, category, tags, featuredImage } = req.body;
+    const { id, title, content, summary, category, tags, featuredImage } = req.body;
 
     const blog = await Blog.findById(id);
 
@@ -323,7 +326,7 @@ const updateBlog = async (req, res) => {
       },
       { new: true }
     )
-      .populate('author', 'username fullName profilePicture')
+      .populate('author', 'username fullName image')
       .populate('category', 'name slug');
 
     res.status(200).json({

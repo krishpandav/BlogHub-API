@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     maxlength: 500,
     default: ''
   },
-  profilePicture: {
+  image: {
     type: String,
     default: ''
   },
@@ -45,11 +45,11 @@ const userSchema = new mongoose.Schema({
   },
   blogs: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Blog'
+    ref: 'blogs'
   }],
   likedBlogs: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Blog'
+    ref: 'blogs'
   }],
   lastLogin: {
     type: Date
@@ -65,7 +65,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Index for better performance
-userSchema.index({ email: 1, username: 1 });
-userSchema.index({ isActive: 1 });
+// userSchema.index({ email: 1, username: 1 });
+// userSchema.index({ isActive: 1 });
 
 module.exports = mongoose.model('users', userSchema);
