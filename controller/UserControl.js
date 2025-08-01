@@ -139,7 +139,7 @@ const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId)
       .select('-password')
-      .populate('blogs', 'title createdAt likes views');
+      .populate('blogs', 'title created_at likes views');
 
     if (!user) {
       return res.status(404).json({
@@ -169,12 +169,12 @@ const getPublicProfile = async (req, res) => {
     const { id } = req.params;
 
     const user = await User.findById(id)
-      .select('username fullName bio image createdAt')
+      .select('username fullName bio image created_at')
       .populate({
         path: 'blogs',
-        select: 'title summary createdAt likes views featuredImage',
+        select: 'title summary created_at likes views image',
         match: { status: 'published' },
-        options: { sort: { createdAt: -1 } }
+        options: { sort: { created_at: -1 } }
       });
 
     if (!user) {
@@ -206,7 +206,7 @@ const updateProfile = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.userId,
-      { fullName, bio, image, updatedAt: new Date() },
+      { fullName, bio, image, updated_at: new Date() },
       { new: true, select: '-password' }
     );
 
@@ -241,7 +241,7 @@ const getMyBlogs = async (req, res) => {
 
     const blogs = await Blog.find({ author: req.user.userId })
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -283,7 +283,7 @@ const getLikedBlogs = async (req, res) => {
           { path: 'category', select: 'name slug' }
         ],
         options: {
-          sort: { createdAt: -1 },
+          sort: { created_at: -1 },
           skip: skip,
           limit: parseInt(limit)
         }

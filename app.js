@@ -9,7 +9,10 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://127.0.0.1:5501', // specify the exact origin
+    credentials: true               // allow cookies/credentials
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

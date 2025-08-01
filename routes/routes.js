@@ -8,10 +8,11 @@ const {
     getBlogById, getAllCategories, createBlog,
     updateBlog, deleteBlog, likeBlog, unlikeBlog } = require('../controller/BlogControl.js');
 
+// Public Routes
 routes.get('/blogs', getAllBlogs);
 routes.get('/blogs/category/:categorySlug', getBlogsByCategory);
 routes.get('/blogs/popular', getPopularBlogs);
-routes.get('/blogs/:id', getBlogById);
+routes.get('/blog/:id', getBlogById);
 routes.get('/category', getAllCategories);
 
 routes.post('/blog', auth, createBlog);

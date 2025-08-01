@@ -15,13 +15,13 @@ const getDashboard = async (req, res) => {
     const recentBlogs = await Blog.find()
       .populate('author', 'username fullName')
       .populate('category', 'name')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .limit(5);
 
     // Get recent users
     const recentUsers = await User.find()
-      .select('username fullName email createdAt isActive')
-      .sort({ createdAt: -1 })
+      .select('username fullName email created_at isActive')
+      .sort({ created_at: -1 })
       .limit(5);
 
     // Get top liked blogs
@@ -80,7 +80,7 @@ const getAllUsers = async (req, res) => {
     const users = await User.find(filter)
       .select('-password')
       .populate('blogs', 'title')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -123,7 +123,7 @@ const updateUserStatus = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { isActive, updatedAt: new Date() },
+      { isActive, updated_at: new Date() },
       { new: true, select: '-password' }
     );
 
@@ -214,7 +214,7 @@ const getAllBlogsAdmin = async (req, res) => {
     const blogs = await Blog.find(filter)
       .populate('author', 'username fullName email')
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -256,7 +256,7 @@ const updateBlogStatus = async (req, res) => {
 
     const updatedBlog = await Blog.findByIdAndUpdate(
       id,
-      { status, updatedAt: new Date() },
+      { status, updated_at: new Date() },
       { new: true }
     )
       .populate('author', 'username fullName')
@@ -377,17 +377,17 @@ const updateCategory = async (req, res) => {
   try {
     const { id, name, description, isActive } = req.body;
 
-    let updateData = { description, isActive, updatedAt: new Date() };
+    let updated_ata = { description, isActive, updated_at: new Date() };
 
     if (name) {
       const slug = name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
-      updateData.name = name;
-      updateData.slug = slug;
+      updated_ata.name = name;
+      updated_ata.slug = slug;
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(
       id,
-      updateData,
+      updated_ata,
       { new: true }
     );
 

@@ -54,11 +54,11 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date
   },
-  createdAt: {
+  created_at: {
     type: Date,
     default: Date.now
   },
-  updatedAt: {
+  updated_at: {
     type: Date,
     default: Date.now
   }

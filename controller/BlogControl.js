@@ -5,7 +5,7 @@ const Category = require('../model/Category');
 // Create new blog
 const createBlog = async (req, res) => {
   try {
-    const { title, content, summary, category, tags, featuredImage } = req.body;
+    const { title, content, summary, category, tags, image, status } = req.body;
 
     // Validation
     if (!title || !content || !summary || !category) {
@@ -30,9 +30,9 @@ const createBlog = async (req, res) => {
       summary,
       category,
       tags: tags || [],
-      featuredImage,
+      image,
       author: req.user.userId,
-      status: 'published'
+      status: status
     });
 
     await newBlog.save();
@@ -63,7 +63,7 @@ const getAllBlogs = async (req, res) => {
     const {
       page = 1,
       limit = 10,
-      sortBy = 'createdAt',
+      sortBy = 'created_at',
       sortOrder = 'desc',
       searchtext,
     } = req.query;
@@ -146,7 +146,7 @@ const searchBlogs = async (req, res) => {
     const blogs = await Blog.find(searchFilter)
       .populate('author', 'username fullName image')
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -198,7 +198,7 @@ const getBlogsByCategory = async (req, res) => {
     })
       .populate('author', 'username fullName image')
       .populate('category', 'name slug')
-      .sort({ createdAt: -1 })
+      .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -294,7 +294,7 @@ const getBlogById = async (req, res) => {
 // Update blog
 const updateBlog = async (req, res) => {
   try {
-    const { id, title, content, summary, category, tags, featuredImage } = req.body;
+    const { id, title, content, summary, category, tags, image } = req.body;
 
     const blog = await Blog.findById(id);
 
@@ -321,8 +321,8 @@ const updateBlog = async (req, res) => {
         summary,
         category,
         tags,
-        featuredImage,
-        updatedAt: new Date()
+        image,
+        updated_at: new Date()
       },
       { new: true }
     )
