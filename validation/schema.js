@@ -11,11 +11,43 @@ exports.validate = (data, schema) => {
 exports.userRegistrationSchema = joi.object({
     username: joi.string().required().trim().max(30).min(3),
     email: joi.string().email().required().trim(),
-    password: joi.string().required().min(6),
+    password: joi.string().required().min(4),
     fullName: joi.string().required().trim().max(100)
 });
 
 exports.userLoginSchema = joi.object({
     username: joi.string().required().trim().max(30).min(3),
-    password: joi.string().required().min(6),
+    password: joi.string().required().min(4),
+});
+
+exports.userInfoUpdateSchema = joi.object({
+    fullName: joi.string().required().trim().allow(''),
+    bio: joi.string().required().allow('').max(500),
+    image: joi.string().required().allow('')
+});
+
+exports.blogCreateSchema = joi.object({
+    title: joi.string().required().max(200).trim(),
+    content: joi.string().required(),
+    category: joi.string().required(),
+    tags: joi.array().items(joi.string()).required(),
+    image: joi.string().required().allow(''),
+    status: joi.string().valid(['draft', 'published', 'blocked']).required()
+});
+
+exports.getAllBlogsSchema = joi.object({
+    page: joi.number().integer().required(),
+    limit: joi.number().integer().required(),
+    sortBy: joi.string().optional().allow(null),
+    sortOrder: joi.string().optional().allow(null),
+    searchtext: joi.string().optional().allow(null),
+});
+
+exports.updateBlogSchema = joi.object({
+    id: joi.string().required(),
+    title: joi.string().required().max(200).trim(),
+    content: joi.string().required(),
+    category: joi.string().required(),
+    tags: joi.array().items(joi.string()).required(),
+    image: joi.string().required().allow('')
 });

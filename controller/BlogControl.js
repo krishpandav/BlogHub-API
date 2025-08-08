@@ -1,18 +1,18 @@
 const Blog = require('../model/Blog');
 const User = require('../model/User');
 const Category = require('../model/Category');
+const { logMessage } = require('../common/log.js');
+const { validate, blogCreateSchema, getAllBlogsSchema } = require('../validation/schema.js');
+const folder = 'BlogControl';
 
 // Create new blog
 const createBlog = async (req, res) => {
   try {
     const { title, content, summary, category, tags, image, status } = req.body;
 
-    // Validation
-    if (!title || !content || !summary || !category) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title, content, summary and category are required'
-      });
+    const isValidReq = validate(req.body, blogCreateSchema);
+    if (isValidReq) {
+      return res.status(400).json({ success: false, message: isValidReq });
     }
 
     // Check if category exists
@@ -41,15 +41,16 @@ const createBlog = async (req, res) => {
       .populate('category')
       .populate('author', 'username email');
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Blog created successfully',
       data: populatedBlog
     });
 
   } catch (error) {
-    console.error('Create blog error:', error);
-    res.status(500).json({
+    console.error('Create blog error:', error.message);
+    logMessage(`${folder}/createBlog`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to create blog',
       error: error.message
@@ -67,6 +68,11 @@ const getAllBlogs = async (req, res) => {
       sortOrder = 'desc',
       searchtext,
     } = req.query;
+
+    const isValidReq = validate(req.body, getAllBlogsSchema);
+    if (isValidReq) {
+      return res.status(400).json({ success: false, message: isValidReq });
+    }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
@@ -94,7 +100,7 @@ const getAllBlogs = async (req, res) => {
     const totalBlogs = await Blog.countDocuments(query);
     const totalPages = Math.ceil(totalBlogs / parseInt(limit));
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         blogs,
@@ -109,8 +115,9 @@ const getAllBlogs = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get all blogs error:', error);
-    res.status(500).json({
+    console.error('Get all blogs error:', error.message);
+    logMessage(`${folder}/getAllBlogs`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get blogs',
       error: error.message
@@ -118,62 +125,6 @@ const getAllBlogs = async (req, res) => {
   }
 };
 
-
-// Search blogs
-const searchBlogs = async (req, res) => {
-  try {
-    const { q, page = 1, limit = 10 } = req.query;
-
-    if (!q) {
-      return res.status(400).json({
-        success: false,
-        message: 'Search query is required'
-      });
-    }
-
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    const searchFilter = {
-      status: 'published',
-      $or: [
-        { title: { $regex: q, $options: 'i' } },
-        { summary: { $regex: q, $options: 'i' } },
-        { content: { $regex: q, $options: 'i' } },
-        { tags: { $in: [new RegExp(q, 'i')] } }
-      ]
-    };
-
-    const blogs = await Blog.find(searchFilter)
-      .populate('author', 'username fullName image')
-      .populate('category', 'name slug')
-      .sort({ created_at: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    const totalBlogs = await Blog.countDocuments(searchFilter);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        blogs,
-        searchQuery: q,
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(totalBlogs / parseInt(limit)),
-          totalBlogs
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Search blogs error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to search blogs',
-      error: error.message
-    });
-  }
-};
 
 // Get blogs by category
 const getBlogsByCategory = async (req, res) => {
@@ -207,7 +158,7 @@ const getBlogsByCategory = async (req, res) => {
       status: 'published'
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         category,
@@ -221,8 +172,9 @@ const getBlogsByCategory = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get blogs by category error:', error);
-    res.status(500).json({
+    console.error('Get blogs by category error:', error.message);
+    logMessage(`${folder}/getBlogsByCategory`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get blogs by category',
       error: error.message
@@ -241,14 +193,15 @@ const getPopularBlogs = async (req, res) => {
       .sort({ likes: -1, views: -1 })
       .limit(parseInt(limit));
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: blogs
     });
 
   } catch (error) {
-    console.error('Get popular blogs error:', error);
-    res.status(500).json({
+    console.error('Get popular blogs error:', error.message);
+    logMessage(`${folder}/getPopularBlogs`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get popular blogs',
       error: error.message
@@ -276,14 +229,15 @@ const getBlogById = async (req, res) => {
     await Blog.findByIdAndUpdate(id, { $inc: { views: 1 } });
     blog.views += 1;
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: blog
     });
 
   } catch (error) {
-    console.error('Get blog by ID error:', error);
-    res.status(500).json({
+    console.error('Get blog by ID error:', error.message);
+    logMessage(`${folder}/getBlogById`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get blog',
       error: error.message
@@ -295,6 +249,11 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id, title, content, summary, category, tags, image } = req.body;
+
+    const isValidReq = validate(req.body, updateBlogSchema);
+    if (isValidReq) {
+      return res.status(400).json({ success: false, message: isValidReq });
+    }
 
     const blog = await Blog.findById(id);
 
@@ -329,15 +288,16 @@ const updateBlog = async (req, res) => {
       .populate('author', 'username fullName image')
       .populate('category', 'name slug');
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Blog updated successfully',
       data: updatedBlog
     });
 
   } catch (error) {
-    console.error('Update blog error:', error);
-    res.status(500).json({
+    console.error('Update blog error:', error.message);
+    logMessage(`${folder}/updateBlog`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to update blog',
       error: error.message
@@ -374,14 +334,15 @@ const deleteBlog = async (req, res) => {
       $pull: { blogs: id }
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Blog deleted successfully'
     });
 
   } catch (error) {
-    console.error('Delete blog error:', error);
-    res.status(500).json({
+    console.error('Delete blog error:', error.message);
+    logMessage(`${folder}/deleteBlog`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete blog',
       error: error.message
@@ -417,15 +378,16 @@ const likeBlog = async (req, res) => {
     await Blog.findByIdAndUpdate(id, { $inc: { likes: 1 } });
     await User.findByIdAndUpdate(userId, { $push: { likedBlogs: id } });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Blog liked successfully',
       data: { likes: blog.likes + 1 }
     });
 
   } catch (error) {
-    console.error('Like blog error:', error);
-    res.status(500).json({
+    console.error('Like blog error:', error.message);
+    logMessage(`${folder}/likeBlog`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to like blog',
       error: error.message
@@ -461,15 +423,16 @@ const unlikeBlog = async (req, res) => {
     await Blog.findByIdAndUpdate(id, { $inc: { likes: -1 } });
     await User.findByIdAndUpdate(userId, { $pull: { likedBlogs: id } });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Blog unliked successfully',
       data: { likes: blog.likes - 1 }
     });
 
   } catch (error) {
-    console.error('Unlike blog error:', error);
-    res.status(500).json({
+    console.error('Unlike blog error:', error.message);
+    logMessage(`${folder}/unlikeBlog`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to unlike blog',
       error: error.message
@@ -483,14 +446,14 @@ const getAllCategories = async (req, res) => {
     const categories = await Category.find({ isActive: true })
       .sort({ name: 1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: categories
     });
 
   } catch (error) {
     console.error('Get categories error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to get categories',
       error: error.message

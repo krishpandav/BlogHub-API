@@ -1,6 +1,8 @@
 const User = require('../model/User');
 const Blog = require('../model/Blog');
 const Category = require('../model/Category');
+const { logMessage } = require('../common/log.js');
+const folder = 'AdminControl';
 
 // Get admin dashboard statistics
 const getDashboard = async (req, res) => {
@@ -31,7 +33,7 @@ const getDashboard = async (req, res) => {
       .sort({ likes: -1 })
       .limit(5);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         stats: {
@@ -48,8 +50,9 @@ const getDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get dashboard error:', error);
-    res.status(500).json({
+    console.error('Get dashboard error:', error.message);
+    logMessage(`${folder}/getDashboard`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get dashboard data',
       error: error.message
@@ -86,7 +89,7 @@ const getAllUsers = async (req, res) => {
 
     const totalUsers = await User.countDocuments(filter);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         users,
@@ -99,8 +102,9 @@ const getAllUsers = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get all users error:', error);
-    res.status(500).json({
+    console.error('Get all users error:', error.message);
+    logMessage(`${folder}/getAllUsers`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get users',
       error: error.message
@@ -134,15 +138,16 @@ const updateUserStatus = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
       data: updatedUser
     });
 
   } catch (error) {
-    console.error('Update user status error:', error);
-    res.status(500).json({
+    console.error('Update user status error:', error.message);
+    logMessage(`${folder}/updateUserStatus`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to update user status',
       error: error.message
@@ -177,14 +182,15 @@ const deleteUser = async (req, res) => {
     // Delete user
     await User.findByIdAndDelete(id);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'User deleted successfully'
     });
 
   } catch (error) {
-    console.error('Delete user error:', error);
-    res.status(500).json({
+    console.error('Delete user error:', error.message);
+    logMessage(`${folder}/deleteUser`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete user',
       error: error.message
@@ -220,7 +226,7 @@ const getAllBlogsAdmin = async (req, res) => {
 
     const totalBlogs = await Blog.countDocuments(filter);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         blogs,
@@ -233,8 +239,9 @@ const getAllBlogsAdmin = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get all blogs admin error:', error);
-    res.status(500).json({
+    console.error('Get all blogs admin error:', error.message);
+    logMessage(`${folder}/getAllBlogsAdmin`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get blogs',
       error: error.message
@@ -269,15 +276,16 @@ const updateBlogStatus = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Blog status updated to ${status}`,
       data: updatedBlog
     });
 
   } catch (error) {
-    console.error('Update blog status error:', error);
-    res.status(500).json({
+    console.error('Update blog status error:', error.message);
+    logMessage(`${folder}/updateBlogStatus`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to update blog status',
       error: error.message
@@ -305,14 +313,15 @@ const deleteBlogAdmin = async (req, res) => {
       $pull: { blogs: id }
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Blog deleted successfully'
     });
 
   } catch (error) {
-    console.error('Delete blog admin error:', error);
-    res.status(500).json({
+    console.error('Delete blog admin error:', error.message);
+    logMessage(`${folder}/deleteBlogAdmin`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete blog',
       error: error.message
@@ -356,15 +365,16 @@ const createCategory = async (req, res) => {
 
     await newCategory.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Category created successfully',
       data: newCategory
     });
 
   } catch (error) {
-    console.error('Create category error:', error);
-    res.status(500).json({
+    console.error('Create category error:', error.message);
+    logMessage(`${folder}/createCategory`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to create category',
       error: error.message
@@ -398,15 +408,16 @@ const updateCategory = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Category updated successfully',
       data: updatedCategory
     });
 
   } catch (error) {
-    console.error('Update category error:', error);
-    res.status(500).json({
+    console.error('Update category error:', error.message);
+    logMessage(`${folder}/updateCategory`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to update category',
       error: error.message
@@ -438,14 +449,15 @@ const deleteCategory = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Category deleted successfully'
     });
 
   } catch (error) {
-    console.error('Delete category error:', error);
-    res.status(500).json({
+    console.error('Delete category error:', error.message);
+    logMessage(`${folder}/deleteCategory`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete category',
       error: error.message

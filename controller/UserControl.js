@@ -2,7 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../model/User.js');
 const Blog = require('../model/Blog');
-const { validate, userRegistrationSchema, userLoginSchema } = require('../validation/schema.js');
+const { logMessage } = require('../common/log.js');
+const { validate, userRegistrationSchema, userLoginSchema, userInfoUpdateSchema } = require('../validation/schema.js');
+const folder = 'UserControl';
 
 // Register new user
 const register = async (req, res) => {
@@ -43,7 +45,7 @@ const register = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
@@ -55,8 +57,9 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
+    console.log('Registration error:', error.message);
+    logMessage(`${folder}/register`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Registration failed',
       error: error.message
@@ -108,7 +111,7 @@ const login = async (req, res) => {
     // Update last login
     await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Login successful',
       data: {
@@ -125,8 +128,9 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
+    console.error('Login error:', error.message);
+    logMessage(`${folder}/login`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Login failed',
       error: error.message
@@ -148,14 +152,15 @@ const getProfile = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: user
     });
 
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({
+    console.error('Get profile error:', error.message);
+    logMessage(`${folder}/getProfile`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get profile',
       error: error.message
@@ -184,14 +189,15 @@ const getPublicProfile = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: user
     });
 
   } catch (error) {
-    console.error('Get public profile error:', error);
-    res.status(500).json({
+    console.error('Get public profile error:', error.message);
+    logMessage(`${folder}/getPublicProfile`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get user profile',
       error: error.message
@@ -202,6 +208,12 @@ const getPublicProfile = async (req, res) => {
 // Update user profile
 const updateProfile = async (req, res) => {
   try {
+
+    const isValidReq = validate(req.body, userInfoUpdateSchema);
+    if (isValidReq) {
+      return res.status(400).json({ success: false, message: isValidReq });
+    }
+
     const { fullName, bio, image } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -217,15 +229,16 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       data: updatedUser
     });
 
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({
+    console.error('Update profile error:', error.message);
+    logMessage(`${folder}/updateProfile`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to update profile',
       error: error.message
@@ -247,7 +260,7 @@ const getMyBlogs = async (req, res) => {
 
     const totalBlogs = await Blog.countDocuments({ author: req.user.userId });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         blogs,
@@ -261,7 +274,8 @@ const getMyBlogs = async (req, res) => {
 
   } catch (error) {
     console.error('Get my blogs error:', error);
-    res.status(500).json({
+    logMessage(`${folder}/getMyBlogs`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get blogs',
       error: error.message
@@ -296,7 +310,7 @@ const getLikedBlogs = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         blogs: user.likedBlogs,
@@ -308,8 +322,9 @@ const getLikedBlogs = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get liked blogs error:', error);
-    res.status(500).json({
+    console.error('Get liked blogs error:', error.message);
+    logMessage(`${folder}/getLikedBlogs`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Failed to get liked blogs',
       error: error.message
