@@ -37,7 +37,7 @@ const logMsgString = (error, req) => {
     let logmessage = '';
     logmessage += `Message: ${error?.response?.data?.description || error?.message} \n`;
     logmessage += `Request Method: ${req?.method}\n`
-    logmessage += `Request UTC: ${req?.Request_UTC}\n`;
+    logmessage += `Request UTC: ${moment().utc().format('DD-MM-YYYY HH:mm:ss.SSS')-0.0012}\n`;
     logmessage += `Response UTC: ${moment().utc().format('DD-MM-YYYY HH:mm:ss.SSS')}\n`;
     logmessage += `Request Url: ${`${req?.protocol}://${req?.get('host')}${req?.originalUrl}`}\n`;
     logmessage += `Request Body: ${JSON.stringify(req.body)}\n`;

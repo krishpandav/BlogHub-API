@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../model/User');
+const { logMessage } = require('../common/log.js');
+const folder = 'auth';
 
 const adminAuth = (req, res, next) => {
   try {
@@ -13,8 +15,9 @@ const adminAuth = (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error('Admin middleware error:', error);
-    res.status(500).json({
+    console.error('Admin middleware error:', error.message);
+    logMessage(`${folder}/adminAuth`, error, req);
+    return res.status(500).json({
       success: false,
       message: 'Server error in admin middleware'
     });
@@ -48,8 +51,9 @@ const auth = async (req, res, next) => {
     next();
 
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({
+    console.error('Auth middleware error:', error.message);
+    logMessage(`${folder}/auth`, error, req);
+    return res.status(401).json({
       success: false,
       message: 'Invalid token'
     });

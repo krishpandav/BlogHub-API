@@ -32,12 +32,12 @@ exports.blogCreateSchema = joi.object({
     category: joi.string().required(),
     tags: joi.array().items(joi.string()).required(),
     image: joi.string().required().allow(''),
-    status: joi.string().valid(['draft', 'published', 'blocked']).required()
+    status: joi.string().valid('draft', 'published', 'blocked').required()
 });
 
 exports.getAllBlogsSchema = joi.object({
     page: joi.number().integer().required(),
-    limit: joi.number().integer().required(),
+    limit: joi.number().integer().optional(),
     sortBy: joi.string().optional().allow(null),
     sortOrder: joi.string().optional().allow(null),
     searchtext: joi.string().optional().allow(null),

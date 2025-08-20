@@ -4,7 +4,7 @@ const { adminAuth, auth } = require('../auth/auth.js');
 
 /* -------------------- Blog routes  --------------------*/
 const {
-    getAllBlogs, getBlogsByCategory, getPopularBlogs,
+    getAllBlogs, getBlogByUserId, getBlogsByCategory, getPopularBlogs,
     getBlogById, getAllCategories, createBlog,
     updateBlog, deleteBlog, likeBlog, unlikeBlog } = require('../controller/BlogControl.js');
 
@@ -14,6 +14,7 @@ routes.get('/blogs/category/:categorySlug', getBlogsByCategory);
 routes.get('/blogs/popular', getPopularBlogs);
 routes.get('/blog/:id', getBlogById);
 routes.get('/category', getAllCategories);
+routes.get('/blogs/user/:id', getBlogByUserId);
 
 routes.post('/blog', auth, createBlog);
 routes.put('/blog', auth, updateBlog);

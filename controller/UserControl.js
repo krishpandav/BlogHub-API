@@ -174,7 +174,7 @@ const getPublicProfile = async (req, res) => {
     const { id } = req.params;
 
     const user = await User.findById(id)
-      .select('username fullName bio image created_at')
+      .select('username fullName email bio image created_at')
       .populate({
         path: 'blogs',
         select: 'title summary created_at likes views image',

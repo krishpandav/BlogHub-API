@@ -10,7 +10,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5501', // specify the exact origin
+    origin: 'http://localhost:4200', // specify the exact origin
     credentials: true               // allow cookies/credentials
 }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
