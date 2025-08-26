@@ -15,7 +15,7 @@ const register = async (req, res) => {
       return res.status(400).json({ success: false, message: isValidReq });
     }
 
-    const { username, email, password, fullName } = req.body;
+    const { username, email, password, fullname } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({
@@ -38,7 +38,7 @@ const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      fullName,
+      fullname,
       role: 'user',
       isActive: true
     });
@@ -52,7 +52,7 @@ const register = async (req, res) => {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        fullName: newUser.fullName
+        fullname: newUser.fullname
       }
     });
 
@@ -119,7 +119,7 @@ const login = async (req, res) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          fullName: user.fullName,
+          fullname: user.fullname,
           role: user.role,
           image: user.image
         },
@@ -174,13 +174,7 @@ const getPublicProfile = async (req, res) => {
     const { id } = req.params;
 
     const user = await User.findById(id)
-      .select('username fullName email bio image created_at')
-      .populate({
-        path: 'blogs',
-        select: 'title summary created_at likes views image',
-        match: { status: 'published' },
-        options: { sort: { created_at: -1 } }
-      });
+      .select('username fullname email bio image likedBlogs created_at');
 
     if (!user) {
       return res.status(404).json({
@@ -214,11 +208,11 @@ const updateProfile = async (req, res) => {
       return res.status(400).json({ success: false, message: isValidReq });
     }
 
-    const { fullName, bio, image } = req.body;
+    const { fullname, bio, image } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.userId,
-      { fullName, bio, image, updated_at: new Date() },
+      { fullname, bio, image, updated_at: new Date() },
       { new: true, select: '-password' }
     );
 
@@ -293,7 +287,7 @@ const getLikedBlogs = async (req, res) => {
       .populate({
         path: 'likedBlogs',
         populate: [
-          { path: 'author', select: 'username fullName image' },
+          { path: 'author', select: 'username fullname image' },
           { path: 'category', select: 'name slug' }
         ],
         options: {

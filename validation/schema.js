@@ -12,7 +12,7 @@ exports.userRegistrationSchema = joi.object({
     username: joi.string().required().trim().max(30).min(3),
     email: joi.string().email().required().trim(),
     password: joi.string().required().min(4),
-    fullName: joi.string().required().trim().max(100)
+    fullname: joi.string().required().trim().max(100)
 });
 
 exports.userLoginSchema = joi.object({
@@ -21,7 +21,7 @@ exports.userLoginSchema = joi.object({
 });
 
 exports.userInfoUpdateSchema = joi.object({
-    fullName: joi.string().required().trim().allow(''),
+    fullname: joi.string().required().trim().allow(''),
     bio: joi.string().required().allow('').max(500),
     image: joi.string().required().allow('')
 });

@@ -92,7 +92,7 @@ const folder = 'BlogControl';
       }
 
       const blogs = await Blog.find(query)
-        .populate('author', 'username fullName image')
+        .populate('author', 'username fullname image')
         .populate('category', 'name slug')
         .sort(sort)
         .skip(skip)
@@ -136,7 +136,7 @@ const folder = 'BlogControl';
 
       // Fetch blogs
       const blogs = await Blog.find(query)
-        .populate('author', 'username fullName image')
+        .populate('author', 'username fullname image')
         .populate('category', 'name slug')
         .sort({ ['created_at']: -1 });
 
@@ -177,7 +177,7 @@ const folder = 'BlogControl';
         category: category._id,
         status: 'published'
       })
-        .populate('author', 'username fullName image')
+        .populate('author', 'username fullname image')
         .populate('category', 'name slug')
         .sort({ created_at: -1 })
         .skip(skip)
@@ -218,7 +218,7 @@ const folder = 'BlogControl';
       const { limit = 10 } = req.query;
 
       const blogs = await Blog.find({ status: 'published' })
-        .populate('author', 'username fullName image')
+        .populate('author', 'username fullname image')
         .populate('category', 'name slug')
         .sort({ likes: -1, views: -1 })
         .limit(parseInt(limit));
@@ -245,7 +245,7 @@ const folder = 'BlogControl';
       const { id } = req.params;
 
       const blog = await Blog.findById(id)
-        .populate('author', 'username fullName image bio')
+        .populate('author', 'username fullname image bio')
         .populate('category', 'name slug');
 
       if (!blog) {
@@ -315,7 +315,7 @@ const folder = 'BlogControl';
         },
         { new: true }
       )
-        .populate('author', 'username fullName image')
+        .populate('author', 'username fullname image')
         .populate('category', 'name slug');
 
       return res.status(200).json({

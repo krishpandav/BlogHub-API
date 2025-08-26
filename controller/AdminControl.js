@@ -15,14 +15,14 @@ const getDashboard = async (req, res) => {
 
     // Get recent blogs
     const recentBlogs = await Blog.find()
-      .populate('author', 'username fullName')
+      .populate('author', 'username fullname')
       .populate('category', 'name')
       .sort({ created_at: -1 })
       .limit(5);
 
     // Get recent users
     const recentUsers = await User.find()
-      .select('username fullName email created_at isActive')
+      .select('username fullname email created_at isActive')
       .sort({ created_at: -1 })
       .limit(5);
 
@@ -71,7 +71,7 @@ const getAllUsers = async (req, res) => {
     if (searchtext) {
       filter.$or = [
         { username: { $regex: searchtext, $options: 'i' } },
-        { fullName: { $regex: searchtext, $options: 'i' } },
+        { fullname: { $regex: searchtext, $options: 'i' } },
         { email: { $regex: searchtext, $options: 'i' } }
       ];
     }
@@ -218,7 +218,7 @@ const getAllBlogsAdmin = async (req, res) => {
     }
 
     const blogs = await Blog.find(filter)
-      .populate('author', 'username fullName email')
+      .populate('author', 'username fullname email')
       .populate('category', 'name slug')
       .sort({ created_at: -1 })
       .skip(skip)
@@ -266,7 +266,7 @@ const updateBlogStatus = async (req, res) => {
       { status, updated_at: new Date() },
       { new: true }
     )
-      .populate('author', 'username fullName')
+      .populate('author', 'username fullname')
       .populate('category', 'name slug');
 
     if (!updatedBlog) {
