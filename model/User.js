@@ -43,10 +43,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  blogs: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'blogs'
-  }],
   likedBlogs: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'blogs'

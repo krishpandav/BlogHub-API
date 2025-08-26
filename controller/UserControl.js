@@ -121,7 +121,8 @@ const login = async (req, res) => {
           email: user.email,
           fullname: user.fullname,
           role: user.role,
-          image: user.image
+          image: user.image,
+          likedBlogs: user.likedBlogs,
         },
         token
       }
@@ -142,8 +143,7 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId)
-      .select('-password')
-      .populate('blogs', 'title created_at likes views');
+      .select('-password');
 
     if (!user) {
       return res.status(404).json({
@@ -208,11 +208,11 @@ const updateProfile = async (req, res) => {
       return res.status(400).json({ success: false, message: isValidReq });
     }
 
-    const { fullname, bio, image } = req.body;
+    const { fullname, email, bio, image = '' } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.userId,
-      { fullname, bio, image, updated_at: new Date() },
+      { fullname, bio, email, image, updated_at: new Date() },
       { new: true, select: '-password' }
     );
 
@@ -248,6 +248,7 @@ const getMyBlogs = async (req, res) => {
 
     const blogs = await Blog.find({ author: req.user.userId })
       .populate('category', 'name slug')
+      .populate('author', 'username fullname')
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));

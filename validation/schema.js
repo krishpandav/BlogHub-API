@@ -22,8 +22,9 @@ exports.userLoginSchema = joi.object({
 
 exports.userInfoUpdateSchema = joi.object({
     fullname: joi.string().required().trim().allow(''),
+    email: joi.string().email().required(),
     bio: joi.string().required().allow('').max(500),
-    image: joi.string().required().allow('')
+    image: joi.string().required().allow('').optional()
 });
 
 exports.blogCreateSchema = joi.object({
