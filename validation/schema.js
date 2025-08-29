@@ -33,6 +33,7 @@ exports.blogCreateSchema = joi.object({
     category: joi.string().required(),
     tags: joi.array().items(joi.string()).required(),
     image: joi.string().required().allow(''),
+    summary: joi.string().required().allow('', null),
     status: joi.string().valid('draft', 'published', 'blocked').required()
 });
 
