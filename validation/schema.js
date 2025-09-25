@@ -51,5 +51,7 @@ exports.updateBlogSchema = joi.object({
     content: joi.string().required(),
     category: joi.string().required(),
     tags: joi.array().items(joi.string()).required(),
-    image: joi.string().required().allow('')
+    summary: joi.string().required().allow('', null),
+    image: joi.string().required().allow(''),
+    status: joi.string().valid('draft', 'published', 'blocked').required()
 });
