@@ -22,7 +22,7 @@ const getDashboard = async (req, res) => {
 
     // Get recent users
     const recentUsers = await User.find()
-      .select('username fullname email created_at isActive')
+      .select('username fullname email role created_at isActive')
       .sort({ created_at: -1 })
       .limit(5);
 
@@ -82,7 +82,7 @@ const getAllUsers = async (req, res) => {
 
     const users = await User.find(filter)
       .select('-password')
-      .populate('blogs', 'title')
+      // .populate('blogs', 'title')
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(parseInt(limit));
