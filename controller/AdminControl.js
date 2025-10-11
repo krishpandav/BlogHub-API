@@ -329,6 +329,26 @@ const deleteBlogAdmin = async (req, res) => {
   }
 };
 
+const getCategories = async (req, res) => {
+  try {
+    const categories = await Category.find()
+      .sort({ name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      data: categories
+    });
+
+  } catch (error) {
+    console.error('Get categories error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get categories',
+      error: error.message
+    });
+  }
+};
+
 // Create category
 const createCategory = async (req, res) => {
   try {
@@ -385,7 +405,7 @@ const createCategory = async (req, res) => {
 // Update category
 const updateCategory = async (req, res) => {
   try {
-    const { id, name, description, isActive } = req.body;
+    const { _id, name, description, isActive } = req.body;
 
     let updated_ata = { description, isActive, updated_at: new Date() };
 
@@ -396,13 +416,13 @@ const updateCategory = async (req, res) => {
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(
-      id,
+      _id,
       updated_ata,
       { new: true }
     );
 
     if (!updatedCategory) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: 'Category not found'
       });
@@ -467,6 +487,7 @@ const deleteCategory = async (req, res) => {
 
 module.exports = {
   getDashboard,
+  getCategories,
   getAllUsers,
   updateUserStatus,
   deleteUser,

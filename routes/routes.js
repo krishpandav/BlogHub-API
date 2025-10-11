@@ -44,7 +44,8 @@ const {
     deleteBlogAdmin,
     createCategory,
     updateCategory,
-    deleteCategory } = require('../controller/AdminControl');
+    deleteCategory, 
+    getCategories} = require('../controller/AdminControl');
 
 // All admin routes require authentication and admin role
 routes.get('/admin/dashboard', auth, adminAuth, getDashboard);
@@ -56,6 +57,7 @@ routes.get('/admin/blogs', auth, adminAuth, getAllBlogsAdmin);
 routes.put('/admin/blog/status', auth, adminAuth, updateBlogStatus);
 routes.delete('/admin/blog/:id', auth, adminAuth, deleteBlogAdmin);
 
+routes.get('/admin/category', auth, adminAuth, getCategories);
 routes.post('/admin/category', auth, adminAuth, createCategory);
 routes.put('/admin/category', auth, adminAuth, updateCategory);
 routes.delete('/admin/category/:id', auth, adminAuth, deleteCategory);
