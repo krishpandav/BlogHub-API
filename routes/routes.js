@@ -37,7 +37,6 @@ routes.get('/user/liked-blogs', auth, getLikedBlogs);
 const {
     getDashboard,
     getAllUsers,
-    updateUserStatus,
     deleteUser,
     getAllBlogsAdmin,
     updateBlogStatus,
@@ -45,12 +44,13 @@ const {
     createCategory,
     updateCategory,
     deleteCategory, 
-    getCategories} = require('../controller/AdminControl');
+    getCategories,
+    updateUser} = require('../controller/AdminControl');
 
 // All admin routes require authentication and admin role
 routes.get('/admin/dashboard', auth, adminAuth, getDashboard);
 routes.get('/admin/users', auth, adminAuth, getAllUsers);
-routes.put('/admin/user/status', auth, adminAuth, updateUserStatus);
+routes.put('/admin/user/:id', auth, adminAuth, updateUser);
 routes.delete('/admin/user/:id', auth, adminAuth, deleteUser);
 
 routes.get('/admin/blogs', auth, adminAuth, getAllBlogsAdmin);

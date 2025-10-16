@@ -98,7 +98,8 @@ const getAllUsers = async (req, res) => {
           totalPages: Math.ceil(totalUsers / parseInt(limit)),
           totalUsers
         }
-      }
+      },
+      message: 'Users fetched successfully'
     });
 
   } catch (error) {
@@ -113,21 +114,21 @@ const getAllUsers = async (req, res) => {
 };
 
 // Update user status
-const updateUserStatus = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
-    const { id, isActive } = req.body;
+    const { id } = req.params;
 
     // Prevent admin from deactivating themselves
     if (id === req.user.userId) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot change your own status'
+        message: 'Cannot updated self.'
       });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       id,
-      { isActive, updated_at: new Date() },
+      { updated_at: new Date(), ...req.body },
       { new: true, select: '-password' }
     );
 
@@ -140,13 +141,13 @@ const updateUserStatus = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+      message: `User updated successfully`,
       data: updatedUser
     });
 
   } catch (error) {
     console.error('Update user status error:', error.message);
-    logMessage(`${folder}/updateUserStatus`, error, req);
+    logMessage(`${folder}/updateUser`, error, req);
     return res.status(500).json({
       success: false,
       message: 'Failed to update user status',
@@ -489,7 +490,7 @@ module.exports = {
   getDashboard,
   getCategories,
   getAllUsers,
-  updateUserStatus,
+  updateUser,
   deleteUser,
   getAllBlogsAdmin,
   updateBlogStatus,
