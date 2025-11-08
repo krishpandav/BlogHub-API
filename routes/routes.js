@@ -551,7 +551,7 @@ routes.post('/blog/:id/like', auth, likeBlog);
 routes.post('/blog/:id/unlike', auth, unlikeBlog);
 
 /* -------------------- Users routes  --------------------*/
-const { register, login, getPublicProfile, getProfile, updateProfile, getMyBlogs, getLikedBlogs } = require('../controller/UserControl');
+const { register, login, getPublicProfile, getProfile, updateProfile, getMyBlogs, getLikedBlogs, changePassword } = require('../controller/UserControl');
 
 /**
  * @swagger
@@ -768,6 +768,9 @@ routes.get('/user/profile', auth, getProfile);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 routes.put('/user/profile', auth, updateProfile);
+
+// Change password
+routes.put('/user/password', auth, changePassword);
 
 /**
  * @swagger

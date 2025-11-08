@@ -327,6 +327,58 @@ const getLikedBlogs = async (req, res) => {
   }
 };
 
+// Change user password
+const changePassword = async (req, res) => {
+  try {
+    const { id, old_password, new_password } = req.body;
+
+    if (!id || !old_password || !new_password) {
+      return res.status(400).json({
+        success: false,
+        message: 'id, old_password and new_password are required'
+      });
+    }
+
+    const user = await User.findById(id);
+
+    if (!user || !user.isActive) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const isMatch = await bcrypt.compare(old_password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Old password is incorrect'
+      });
+    }
+
+    const saltRounds = 12;
+    const hashed = await bcrypt.hash(new_password, saltRounds);
+
+    user.password = hashed;
+    user.updated_at = new Date();
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('Change password error:', error.message);
+    logMessage(`${folder}/changePassword`, error, req);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to change password',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -334,5 +386,6 @@ module.exports = {
   getPublicProfile,
   updateProfile,
   getMyBlogs,
-  getLikedBlogs
+  getLikedBlogs,
+  changePassword
 };

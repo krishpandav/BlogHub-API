@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path')
 const fs = require('fs');
-const bodyParser = require('body-parser');
 const routes = require('./routes/routes.js');
 const connectDB = require('./config/dbConfig');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -35,7 +34,6 @@ const swaggerSpec = swaggerJsdoc({
         },
         servers: [
             {
-                // url: process.env.WEBHOOK_URL,
                 url: 'http://localhost:5051/api',
                 description: 'BlogHub Api Server',
             },
