@@ -504,8 +504,24 @@ const unlikeBlog = async (req, res) => {
 // Get all categories
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ isActive: true })
-      .sort({ name: 1 });
+    const categories = await Category.aggregate([
+      { $match: { isActive: true } },
+      {
+        $lookup: {
+          from: "blogs",
+          localField: "_id",
+          foreignField: "category",
+          as: "blogs"
+        }
+      },
+      {
+        $addFields: {
+          blogCount: { $size: "$blogs" }
+        }
+      },
+      { $project: { blogs: 0 } }, // remove blogs array
+      { $sort: { name: 1 } }
+    ]);
 
     return res.status(200).json({
       success: true,
